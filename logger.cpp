@@ -1,4 +1,4 @@
-#include "logger/logger.h"
+#include "logger.h"
 #include <fmt/format.h>
 
 TimeTracker::TimeTracker(const std::string &m) : msg(m) {
