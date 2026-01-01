@@ -1,8 +1,13 @@
 #include "logging.hpp"
-#include <spdlog/pattern_formatter.h>
 #include <chrono>
-#include <random>
+#include <filesystem>
 #include <iomanip>
+#include <random>
+#include <spdlog/pattern_formatter.h>
+#include <spdlog/sinks/daily_file_sink.h>
+#include <spdlog/sinks/rotating_file_sink.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/spdlog.h>
 #include <sstream>
 
 namespace DB {
@@ -16,20 +21,31 @@ void Logger::initialize(const std::string& serviceName, const std::string& logLe
         logger->set_level(spdlog::level::from_str(logLevel));
         return;
     }
+    std::filesystem::create_directories("logs");
+
     // Create console sink
+    std::vector<spdlog::sink_ptr> sinks;
+
     auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-    
+    console_sink->set_level(spdlog::level::trace);
+    sinks.push_back(console_sink);
+
+    auto file_sink = std::make_shared<spdlog::sinks::daily_file_sink_mt>(fmt::format("logs/{}.log", serviceName), 0, 0, false, 10);
+    file_sink->set_level(spdlog::level::trace);
+    sinks.push_back(file_sink);
+
     // Create logger
-    defaultLogger_ = std::make_shared<spdlog::logger>(serviceName, console_sink);
+    defaultLogger_ = std::make_shared<spdlog::logger>(serviceName, sinks.begin(), sinks.end());
     defaultLogger_->set_level(spdlog::level::from_str(logLevel));
     
     // Set simple pattern
-    defaultLogger_->set_pattern("[%Y-%m-%d %H:%M:%S.%f] [%n] [%l] %v");
+    defaultLogger_->set_pattern("[%Y-%m-%d %H:%M:%S.%f] [%n] [%l] [%t] %v");
     
     // Register as default
     spdlog::register_logger(defaultLogger_);
     spdlog::set_default_logger(defaultLogger_);
-    
+    defaultLogger_->flush_on(spdlog::level::info);
+
     info("Logger initialized for service: " + serviceName);
 }
 
