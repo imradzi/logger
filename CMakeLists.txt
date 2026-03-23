@@ -33,5 +33,8 @@ target_include_directories(logger
 find_package(spdlog REQUIRED)
 find_package(fmt CONFIG REQUIRED)
 
+# Tell spdlog to use external fmt (bundled headers not installed)
+target_compile_definitions(logger PUBLIC SPDLOG_FMT_EXTERNAL)
+
 # Link dependencies
 target_link_libraries(logger PUBLIC spdlog::spdlog fmt::fmt)
