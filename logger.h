@@ -6,7 +6,12 @@ public:
 };
 
 inline void wpLogMessage(const std::string &s) { LOG_INFO(s); }
-inline bool LOG_INFO(const std::string &t) {LOG_INFO(t); return true; }
+inline bool LOG_INFO(const std::string &t) {
+    if (auto logger = DB::Logger::get()) {
+        logger->info(fmt::runtime(t));
+    }
+    return true;
+}
 
 class TimeTracker {
   std::chrono::steady_clock::time_point tStart;

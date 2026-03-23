@@ -23,8 +23,11 @@ set(LOGGER_HEADERS
 add_library(logger STATIC ${LOGGER_SOURCES} ${LOGGER_HEADERS})
 
 # Set include directories for the library
+# Export both the logger dir (for #include "logging.hpp")
+# and its parent (for #include "logger/logging.hpp")
 target_include_directories(logger
     PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
         $<INSTALL_INTERFACE:include>
 )
